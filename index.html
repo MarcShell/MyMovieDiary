@@ -1,0 +1,38 @@
+<!doctype html>
+<html lang="en">
+	<head>
+		<meta charset="UTF-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+		<title>MyMovieDiary</title>
+		<link rel="stylesheet" href="assets/style.css" />
+		<link
+			href="https://fonts.googleapis.com/css2?family=Urbanist:wght@400;500;600;700&family=Open+Sans:wght@400;600&display=swap"
+			rel="stylesheet"
+		/>
+		<script src="./libs/jquery-4.0.0.min.js"></script>
+	</head>
+	<body>
+		<nav id="navbar">
+			<div class="navbar-logo">
+				<img src="assets/mmd_logo.png" alt="mmd-logo" id="mmd-logo" />
+				<a>MyMovieDiary</a>
+			</div>
+
+			<div class="navbar-links">
+				<button class="navbar-link active">Entdecken</button>
+				<button class="navbar-link">Watchlist</button>
+			</div>
+
+			<div class="navbar-actions">
+				<input type="text" id="search-input" placeholder="Filme suchen..." />
+				<button id="toggle-theme" title="Dark/Light Mode">🌙</button>
+			</div>
+		</nav>
+
+		<div id="main-content">
+			<div id="movie-container"></div>
+		</div>
+
+		<script src="assets/script.js"></script>
+	</body>
+</html>
