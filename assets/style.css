@@ -117,12 +117,12 @@ p {
 	color: var(--text);
 }
 
-#toggle-theme {
+#avatar {
 	width: 40px;
 	height: 40px;
 
 	background: none;
-	border: 1px solid var(--border);
+	border: 2px solid var(--border);
 	border-radius: 50%;
 	transition: background-color 0.3s ease;
 
@@ -135,8 +135,14 @@ p {
 	justify-content: center;
 }
 
-#toggle-theme:hover {
-	background: var(--bg);
+#avatar > img {
+	height: 37px;
+}
+
+.navbar-actions > a {
+	font-weight: bold;
+	font-size: 1.1rem;
+	cursor: pointer;
 }
 
 /* ===================== MOVIE CONTAINER ===================== */
