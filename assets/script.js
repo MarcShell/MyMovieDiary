@@ -26,7 +26,6 @@ function renderMovies(movies) {
 				<a>${movie.title}</a>
 				<a>${movie.release_date}</a>
 				<a>${movie.vote_average}</a>
-				<a>${movie.poster_path}</a>
             </div>`;
 
 			container.append(card);
