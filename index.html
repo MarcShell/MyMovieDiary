@@ -9,9 +9,15 @@
 			href="https://fonts.googleapis.com/css2?family=Urbanist:wght@400;500;600;700&family=Open+Sans:wght@400;600&display=swap"
 			rel="stylesheet"
 		/>
+		<link
+			rel="stylesheet"
+			href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"
+		/>
 		<script src="./libs/jquery-4.0.0.min.js"></script>
 	</head>
 	<body>
+		<!-- ===================== Navbar ===================== -->
+
 		<nav id="navbar">
 			<div class="navbar-logo">
 				<img src="assets/mmd_logo.png" alt="mmd-logo" id="mmd-logo" />
@@ -32,6 +38,34 @@
 				</button>
 			</div>
 		</nav>
+
+		<!-- ===================== Kategorien ===================== -->
+
+		<div id="toolbar">
+			<div class="filter-tabs">
+				<button class="filter-tab active" data-type="all">Alle</button>
+				<button class="filter-tab" data-type="movie">Filme</button>
+				<button class="filter-tab" data-type="tv">Serien</button>
+			</div>
+
+			<select id="sort-select">
+				<option value="popularity">Beliebtheit</option>
+				<option value="rating">Bewertung</option>
+				<option value="title">Titel A-Z</option>
+				<option value="release_date">Erscheinungsdatum</option>
+			</select>
+		</div>
+
+		<!-- ===================== Searchbar ===================== -->
+
+		<section id="bg-grid">
+			<div class="search-container">
+				<input type="text" placeholder="Filme suchen..." />
+				<i class="fa fa-search"></i>
+			</div>
+		</section>
+
+		<!-- ===================== Movie Grid ===================== -->
 
 		<div id="main-content">
 			<div id="movie-container"></div>

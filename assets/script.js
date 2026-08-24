@@ -1,12 +1,5 @@
 'use strict';
 
-function getTrendingMovies() {
-	$.getJSON('trendingMovies.json', function (data) {
-		console.log(data);
-		renderMovies(data.results);
-	});
-}
-
 function renderMovies(movies) {
 	const container = $('#movie-container');
 	container.empty(); // alten Inhalt löschen
@@ -23,7 +16,14 @@ function renderMovies(movies) {
 	});
 }
 
-function getMovieSearch() {
+function getTrendingMovies() {
+	$.getJSON('trendingMovies.json', function (data) {
+		console.log(data);
+		renderMovies(data.results);
+	});
+}
+
+function searchMovies() {
 	const options = {
 		method: 'GET',
 		headers: {
@@ -34,7 +34,7 @@ function getMovieSearch() {
 	};
 
 	fetch(
-		'https://api.themoviedb.org/3/search/movie?include_adult=false&language=en-US&page=1',
+		'https://api.themoviedb.org/3/search/movie?query=Avatar&include_adult=false&language=de-DE&page=1',
 		options,
 	)
 		.then((res) => res.json())
@@ -43,4 +43,3 @@ function getMovieSearch() {
 }
 
 getTrendingMovies();
-getMovieSearch();
