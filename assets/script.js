@@ -23,9 +23,7 @@ function renderMovies(movies) {
 			const card = `
             <div class="movie-card">
                 <img src="${posterUrl}" alt="${movie.title}">
-				<a>${movie.title}</a>
-				<a>${movie.release_date}</a>
-				<a>${movie.vote_average}</a>
+
             </div>`;
 
 			container.append(card);
