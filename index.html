@@ -43,9 +43,18 @@
 
 		<div id="toolbar">
 			<div class="filter-tabs">
-				<button class="filter-tab active" data-type="all">Alle</button>
-				<button class="filter-tab" data-type="movie">Filme</button>
-				<button class="filter-tab" data-type="tv">Serien</button>
+				<button id="multi-category" class="filter-tab active" data-type="all">
+					Alle
+				</button>
+				<button id="movie-category" class="filter-tab" data-type="movie">
+					Filme
+				</button>
+				<button id="series-category" class="filter-tab" data-type="tv">
+					Serien
+				</button>
+				<button id="person-category" class="filter-tab" data-type="tv">
+					Personen
+				</button>
 			</div>
 
 			<select id="sort-select">
@@ -114,11 +123,23 @@
 						<li><a href="#">Einstellungen</a></li>
 						<li><a href="#">Abmelden</a></li>
 					</ul>
-					<ul class="box">
+					<ul class="box input-box">
 						<li class="link-name">Abonnieren</li>
 						<li><input type="text" placeholder="E-Mail-Adresse eingeben" /></li>
 						<li><input type="button" value="Abonnieren" /></li>
 					</ul>
+				</div>
+			</div>
+			<div class="bottom-details">
+				<div class="bottom-text">
+					<span class="copyright-text"
+						>Copyright &#169; 2026 <a href="#">MyMovieDiary.</a>All rights
+						reserved</span
+					>
+					<span class="policy-terms">
+						<a href="#">Privacy policy</a>
+						<a href="#">Terms & condition</a>
+					</span>
 				</div>
 			</div>
 		</footer>
