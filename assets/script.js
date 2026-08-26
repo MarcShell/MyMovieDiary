@@ -16,23 +16,48 @@ const navbarButtons = [
 
 navbarButtons.forEach(function (button) {
 	button.addEventListener('click', function () {
-		navbarButtons.forEach(function (btn) {
-			btn.classList.remove('active');
-		});
-
-		button.classList.add('active');
-
 		if (button === popularContentNavbar) {
 			fetchPopularMovies();
+			localStorage.setItem('activeNavId', 'popular-content');
 		} else if (button === topRatedContentNavbar) {
 			fetchTopRatedMovies();
+			localStorage.setItem('activeNavId', 'top-rated-content');
 		} else if (button === upcomingContentNavbar) {
 			fetchUpcomingMovies();
+			localStorage.setItem('activeNavId', 'upcoming-content');
 		} else if (button === watchlistContentNavbar) {
-			// renderWatchlist() oder neue HTML Seite einfügen
+			localStorage.setItem('activeNavId', 'watchlist-content');
+			window.location.href = '../watchlist.html';
 		}
+		restoreActiveNav();
 	});
 });
+
+// Beim Laden jeder Seite aktiven Button wiederherstellen
+function restoreActiveNav() {
+	const savedId = localStorage.getItem('activeNavId');
+
+	navbarButtons.forEach(function (btn) {
+		btn.classList.remove('active');
+	});
+
+	if (savedId) {
+		const activeButton = document.querySelector(`#${savedId}`);
+		if (activeButton) {
+			activeButton.classList.add('active');
+		}
+	}
+
+	if (savedId === 'popular-content') {
+		fetchPopularMovies();
+	} else if (savedId === 'top-rated-content') {
+		fetchTopRatedMovies();
+	} else if (savedId === 'upcoming-content') {
+		fetchUpcomingMovies();
+	}
+}
+
+restoreActiveNav();
 
 // ===================== Kategorien =====================
 
@@ -65,6 +90,14 @@ const searchButton = document.querySelector('#search-button');
 
 searchInput.addEventListener('keydown', function (event) {
 	if (event.key === 'Enter') {
+		const query = searchInput.value.trim();
+
+		if (query !== '') {
+			navbarButtons.forEach(function (btn) {
+				btn.classList.remove('active');
+			});
+		}
+
 		performSearch(searchInput.value);
 	}
 });
@@ -193,7 +226,5 @@ function fetchUpcomingMovies() {
 		})
 		.catch((err) => console.error(err));
 }
-
-fetchPopularMovies();
 
 // ===================== Sonstiges =====================
