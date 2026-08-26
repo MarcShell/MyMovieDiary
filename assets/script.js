@@ -1,5 +1,39 @@
 'use strict';
 
+// ===================== Navbar =====================
+
+const popularContentNavbar = document.querySelector('#popular-content');
+const topRatedContentNavbar = document.querySelector('#top-rated-content');
+const upcomingContentNavbar = document.querySelector('#upcoming-content');
+const watchlistContentNavbar = document.querySelector('#watchlist-content');
+
+const navbarButtons = [
+	popularContentNavbar,
+	topRatedContentNavbar,
+	upcomingContentNavbar,
+	watchlistContentNavbar,
+];
+
+navbarButtons.forEach(function (button) {
+	button.addEventListener('click', function () {
+		navbarButtons.forEach(function (btn) {
+			btn.classList.remove('active');
+		});
+
+		button.classList.add('active');
+
+		if (button === popularContentNavbar) {
+			fetchPopularMovies();
+		} else if (button === topRatedContentNavbar) {
+			fetchTopRatedMovies();
+		} else if (button === upcomingContentNavbar) {
+			fetchUpcomingMovies();
+		} else if (button === watchlistContentNavbar) {
+			// renderWatchlist() oder neue HTML Seite einfügen
+		}
+	});
+});
+
 // ===================== Kategorien =====================
 
 const multiCategoryButton = document.querySelector('#multi-category');
@@ -24,7 +58,7 @@ categoryButtons.forEach(function (button) {
 	});
 });
 
-// ===================== Searchbaar =====================
+// ===================== Searchbar =====================
 
 const searchInput = document.querySelector('#search-input');
 const searchButton = document.querySelector('#search-button');
@@ -50,9 +84,9 @@ function renderCards(items) {
 			const posterUrl = `https://image.tmdb.org/t/p/w500${item.poster_path}`;
 			const card = `
             <div class="movie-card">
-                <img src="${posterUrl}" alt="${item.title}">
-				<a>${item.title}</a>
-				<a>${item.release_date}</a>
+				<div class="card-overlay"></div>
+				<img src="${posterUrl}" alt="${item.title}">
+
             </div>`;
 
 			container.append(card);
@@ -75,8 +109,11 @@ function fetchContent(category, query) {
 	)
 		.then((res) => res.json())
 		.then((data) => {
-			renderCards(data.results);
-			console.log(data.results);
+			if (window.sessionStorage) {
+				console.log(data.results);
+				localStorage.setItem('data', data.results);
+				renderCards(data.results);
+			}
 		})
 		.catch((err) => console.error(err));
 }
@@ -92,3 +129,71 @@ function performSearch(query) {
 		fetchContent('person', query);
 	}
 }
+
+function fetchPopularMovies() {
+	const options = {
+		method: 'GET',
+		headers: {
+			accept: 'application/json',
+			Authorization: `Bearer ${TMDB_TOKEN}`,
+		},
+	};
+
+	fetch(
+		'https://api.themoviedb.org/3/movie/popular?language=de-DE&page=1',
+		options,
+	)
+		.then((res) => res.json())
+		.then((data) => {
+			renderCards(data.results);
+		})
+		.catch((err) => console.error(err));
+}
+
+function fetchTopRatedMovies() {
+	const options = {
+		method: 'GET',
+		headers: {
+			accept: 'application/json',
+			Authorization: `Bearer ${TMDB_TOKEN}`,
+		},
+	};
+
+	fetch(
+		'https://api.themoviedb.org/3/movie/top_rated?language=de-DE&page=1',
+		options,
+	)
+		.then((res) => res.json())
+		.then((data) => {
+			renderCards(data.results);
+		})
+		.catch((err) => console.error(err));
+}
+
+function fetchUpcomingMovies() {
+	const options = {
+		method: 'GET',
+		headers: {
+			accept: 'application/json',
+			Authorization: `Bearer ${TMDB_TOKEN}`,
+		},
+	};
+	const today = new Date().toISOString().split('T')[0]; // z.B. "2026-08-26"
+
+	fetch(
+		`https://api.themoviedb.org/3/movie/upcoming?language=de-DE&region=DE&page=1`,
+		options,
+	)
+		.then((res) => res.json())
+		.then((data) => {
+			const trulyUpcoming = data.results.filter(
+				(movie) => movie.release_date > today,
+			);
+			renderCards(trulyUpcoming);
+		})
+		.catch((err) => console.error(err));
+}
+
+fetchPopularMovies();
+
+// ===================== Sonstiges =====================
