@@ -59,6 +59,53 @@ function restoreActiveNav() {
 
 restoreActiveNav();
 
+// ===================== Modal =====================
+
+const modal = document.querySelector('#modal');
+const settings = document.querySelector('.navbar-actions');
+const closeModalBtn = document.querySelector('#settings-x');
+const lightThemeRadio = document.querySelector('#light-theme');
+const darkThemeRadio = document.querySelector('#dark-theme');
+
+settings.addEventListener('click', () => {
+	modal.classList.add('open-modal');
+});
+
+closeModalBtn.addEventListener('click', () => {
+	modal.classList.remove('open-modal');
+});
+
+// Klick außerhalb schließt das Modal
+modal.addEventListener('click', function (event) {
+	if (event.target === modal) {
+		modal.classList.remove('open-modal');
+	}
+});
+
+// Theme umschalten
+lightThemeRadio.addEventListener('change', function () {
+	document.body.classList.remove('dark');
+	localStorage.setItem('theme', 'light');
+});
+
+darkThemeRadio.addEventListener('change', function () {
+	document.body.classList.add('dark');
+	localStorage.setItem('theme', 'dark');
+});
+
+// Gespeichertes Theme beim Laden wiederherstellen
+document.addEventListener('DOMContentLoaded', function () {
+	const savedTheme = localStorage.getItem('theme');
+
+	if (savedTheme === 'dark') {
+		document.body.classList.add('dark');
+		darkThemeRadio.checked = true;
+	} else {
+		document.body.classList.remove('dark');
+		lightThemeRadio.checked = true;
+	}
+});
+
 // ===================== Kategorien =====================
 
 const multiCategoryButton = document.querySelector('#multi-category');
@@ -110,38 +157,59 @@ searchButton.addEventListener('click', function () {
 
 function renderCards(items) {
 	const container = $('#movie-container');
-	container.empty(); // alten Inhalt löschen
+	container.empty();
 
 	items.forEach(function (item) {
-		items.forEach(function (item) {
-			if (item.poster_path) {
-				const posterUrl = `https://image.tmdb.org/t/p/w500${item.poster_path}`;
-				const year = item.release_date
-					? item.release_date.split('-')[0]
-					: 'Kein Veröffentlichungsjahr bekannt';
-				const rating = item.vote_average
-					? item.vote_average.toFixed(2)
-					: 'Keine Bewertung bekannt';
+		if (item.poster_path) {
+			const posterUrl = `https://image.tmdb.org/t/p/w500${item.poster_path}`;
+			const year = item.release_date
+				? item.release_date.split('-')[0]
+				: 'Kein Veröffentlichungsjahr bekannt';
+			const rating = item.vote_average
+				? item.vote_average.toFixed(2)
+				: 'Keine Bewertung bekannt';
 
-				const card = `
-					<div class="movie-card">
+			const card = `
+					<div class="movie-card" data-id="${item.id}">
 						<div class="card-image-wrap">
 							<img src="${posterUrl}" alt="${item.title}">
+							<button class="watchlist-button" title="Zur Watchlist hinzufügen">
+								<i class="fa fa-plus"></i>
+							</button>
 						</div>
+
 						<div class="card-info">
 							<span class="card-title">${item.title}</span>
 							<div class="card-meta">
-								<span>${year}</span>
-								<span><i class="fa fa-star"></i> ${rating}</span>
+								<span class="card-year">${year}</span>
+								<span class="card-rating"><i class="fa fa-star"></i> ${rating}</span>
 							</div>
 						</div>
 					</div>`;
 
-				container.append(card);
-			}
-		});
+			container.append(card);
+		}
 	});
 }
+
+const movieContainer = document.querySelector('#movie-container');
+
+movieContainer.addEventListener('click', function (event) {
+	const button = event.target.closest('.watchlist-button');
+	const icon = document.querySelector('.watchlist-button > i');
+
+	if (button && icon.classList.contains('fa-plus')) {
+		const movieId = button.closest('.movie-card').dataset;
+		button.classList.replace('fa-plus', 'fa-check');
+		localStorage.setItem('watchlist', JSON.stringify(watchlist));
+
+		console.log('Geklickter Button:', button);
+		console.log('Zugehörige Film-ID:', movieId);
+	} else if (button && icon.classList.contains('fa-check')) {
+		button.classList.replace('fa-check', 'fa-plus');
+		localStorage.removeItem('watchlist');
+	}
+});
 
 function fetchContent(category, query) {
 	const options = {

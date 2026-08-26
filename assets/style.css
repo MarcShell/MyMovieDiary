@@ -49,10 +49,6 @@ body {
 	min-height: 100vh;
 }
 
-#main-content {
-	flex: 1; /* nimmt allen verfügbaren Platz ein, drückt footer nach unten */
-}
-
 h1,
 h2,
 h3,
@@ -167,6 +163,131 @@ p {
 	height: 37px;
 }
 
+/* ===================== Modal ===================== */
+
+.modal {
+	position: fixed; /* statt absolute */
+	inset: 0; /* ersetzt top: 0; left: 0; right: 0; bottom: 0 */
+	width: 100vw;
+	height: 100vh;
+	background-color: rgba(0, 0, 0, 0.5);
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	pointer-events: none;
+	z-index: 999; /* möglichst hoch */
+	opacity: 0;
+	transition: 0.3s ease;
+}
+
+.modal-container {
+	background-color: var(--surface);
+	width: 26rem;
+	border-radius: 20px;
+	display: flex;
+	flex-direction: column;
+	overflow: hidden;
+}
+
+#modal-heading {
+	font-size: 28px;
+	font-weight: 600;
+	color: white;
+	font-family: 'Urbanist', sans-serif;
+}
+
+.modal-top {
+	display: flex;
+	background-color: var(--accent);
+	padding: 0rem 1.5rem;
+	justify-content: space-between;
+	align-items: center;
+}
+
+#settings-x {
+	cursor: pointer;
+	color: white;
+}
+
+.modal-subheading {
+	display: block;
+	margin: 18px 20px;
+	font-family: 'Urbanist', sans-serif;
+	font-weight: 300;
+	font-size: 18px;
+}
+
+.theme-switcher input {
+	display: none;
+}
+
+.theme-switcher {
+	position: relative;
+	background-color: var(--bg);
+	border-radius: 10px;
+	display: flex;
+	padding: 3px;
+	margin: 0 20px 48px 20px;
+}
+
+.theme-switcher label {
+	position: relative;
+	z-index: 2;
+	width: calc(100% / 2);
+}
+
+.theme-switcher label span {
+	padding: 8px 0;
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	font-weight: 600;
+	color: var(--text);
+}
+
+.theme-switcher label span:hover {
+	color: var(--text-muted);
+	cursor: pointer;
+}
+
+.theme-switcher .slider {
+	position: absolute;
+	z-index: 1;
+	width: calc((100% - 6px) / 2);
+	top: 3px;
+	bottom: 3px;
+	transform: translateX(-110%);
+	border-radius: 8px;
+	transition:
+		0.3s ease,
+		transform 0.25s ease-out;
+	background-color: var(--surface);
+}
+
+.theme-switcher input:nth-of-type(1):checked ~ .slider {
+	transform: translateX(0);
+}
+
+.theme-switcher input:nth-of-type(2):checked ~ .slider {
+	transform: translateX(100%);
+}
+
+.modal-bottom span i {
+	margin-right: 5px;
+	font-size: 20px;
+	margin: 2px;
+}
+
+#settings-x:hover {
+	color: red;
+	transition: 0.3s ease;
+}
+
+.open-modal {
+	opacity: 1;
+	pointer-events: auto;
+}
+
 /* ===================== Kategorien ===================== */
 
 #toolbar {
@@ -270,10 +391,12 @@ p {
 /* ===================== Movie Grid ===================== */
 
 #main-content {
+	flex: 1;
 	width: 100%;
 	max-width: 1400px;
 	margin: 0 auto;
-	padding: 24px 0px;
+	padding-top: 30px;
+	padding-bottom: 100px;
 }
 
 #movie-container {
@@ -439,7 +562,9 @@ footer .content .top {
 	align-items: center;
 	gap: 4px;
 	color: white;
-	font-size: 28px;
+	font-size: 30px;
+	font-family: 'Urbanist', sans-serif;
+	font-weight: 500;
 }
 
 .content .top .logo-details #mmd-logo-footer {
@@ -528,10 +653,12 @@ footer .content .link-boxes .box input {
 
 .content .link-boxes .box .link-name {
 	color: white;
-	font-size: 18px;
+	font-size: 20px;
 	font-weight: bold;
 	margin-bottom: 10px;
 	position: relative;
+	font-family: 'Urbanist', sans-serif;
+	font-weight: 600;
 }
 
 .link-boxes .box .link-name::before {
