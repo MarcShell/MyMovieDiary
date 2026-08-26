@@ -113,17 +113,33 @@ function renderCards(items) {
 	container.empty(); // alten Inhalt löschen
 
 	items.forEach(function (item) {
-		if (item.poster_path) {
-			const posterUrl = `https://image.tmdb.org/t/p/w500${item.poster_path}`;
-			const card = `
-            <div class="movie-card">
-				<div class="card-overlay"></div>
-				<img src="${posterUrl}" alt="${item.title}">
+		items.forEach(function (item) {
+			if (item.poster_path) {
+				const posterUrl = `https://image.tmdb.org/t/p/w500${item.poster_path}`;
+				const year = item.release_date
+					? item.release_date.split('-')[0]
+					: 'Kein Veröffentlichungsjahr bekannt';
+				const rating = item.vote_average
+					? item.vote_average.toFixed(2)
+					: 'Keine Bewertung bekannt';
 
-            </div>`;
+				const card = `
+					<div class="movie-card">
+						<div class="card-image-wrap">
+							<img src="${posterUrl}" alt="${item.title}">
+						</div>
+						<div class="card-info">
+							<span class="card-title">${item.title}</span>
+							<div class="card-meta">
+								<span>${year}</span>
+								<span><i class="fa fa-star"></i> ${rating}</span>
+							</div>
+						</div>
+					</div>`;
 
-			container.append(card);
-		}
+				container.append(card);
+			}
+		});
 	});
 }
 
@@ -144,7 +160,6 @@ function fetchContent(category, query) {
 		.then((data) => {
 			if (window.sessionStorage) {
 				console.log(data.results);
-				localStorage.setItem('data', data.results);
 				renderCards(data.results);
 			}
 		})
