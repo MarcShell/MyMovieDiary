@@ -297,6 +297,7 @@ p {
 	padding: 12px 24px;
 	gap: 12px;
 	flex-wrap: wrap;
+	opacity: 0;
 }
 
 .filter-tabs {
@@ -473,6 +474,7 @@ p {
 	color: var(--accent);
 
 	display: flex;
+	align-items: center;
 	flex-direction: column;
 	gap: 2px;
 
@@ -544,6 +546,28 @@ p {
 	transform: scale(1.1);
 }
 
+.error-box {
+	background: #fdecea;
+	border: 1px solid #f5c2c0;
+	border-left: 4px solid #d93025;
+	color: #8a1f13;
+	border-radius: 6px;
+	padding: 16px 20px;
+	margin: 24px;
+	font-family: 'Open Sans', sans-serif;
+	grid-column: 1 / -1; /* nimmt volle Breite ein, auch im Grid */
+}
+
+.error-box strong {
+	display: block;
+	margin-bottom: 4px;
+	font-size: 15px;
+}
+
+.error-box p {
+	margin: 0;
+	font-size: 14px;
+}
 /* .movie-card {
 	max-height: 400px;
 	max-width: 300px;

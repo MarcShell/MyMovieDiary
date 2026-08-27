@@ -117,6 +117,18 @@ const categoryButtons = [
 	personCategoryButton,
 ];
 
+const toolbar = document.querySelector('#toolbar');
+
+function updateToolbar() {
+	if (navbarButtons.some((btn) => btn.classList.contains('active'))) {
+		console.log('0');
+		toolbar.style.opacity = '0';
+	} else {
+		console.log('1');
+		toolbar.style.opacity = '1';
+	}
+}
+
 categoryButtons.forEach(function (button) {
 	button.addEventListener('click', function () {
 		categoryButtons.forEach(function (btn) {
@@ -124,6 +136,10 @@ categoryButtons.forEach(function (button) {
 		});
 
 		button.classList.add('active');
+
+		if (searchInput.value.trim() !== '') {
+			performSearch(searchInput.value);
+		}
 	});
 });
 
@@ -142,12 +158,22 @@ searchInput.addEventListener('keydown', function (event) {
 			});
 		}
 
+		updateToolbar();
 		performSearch(searchInput.value);
 	}
 });
 
 searchButton.addEventListener('click', function () {
-	performSearch(searchInput.value);
+	const query = searchInput.value.trim();
+
+	if (query !== '') {
+		navbarButtons.forEach(function (btn) {
+			btn.classList.remove('active');
+		});
+
+		updateToolbar();
+		performSearch(query);
+	}
 });
 
 // ===================== Movie Grid =====================
@@ -195,7 +221,7 @@ function renderCards(items) {
 			item.media_type === 'tv'
 				? 'Serie'
 				: item.media_type === 'person'
-					? item.known_for_department || 'Person'
+					? 'Person'
 					: 'Film';
 
 		const watchlistButton = isPerson
@@ -211,13 +237,13 @@ function renderCards(items) {
 
 		const card = `
 		<div class="movie-card" data-id="${item.id}">
+		<span class="card-type">${typeLabel}</span>
 			<div class="card-image-wrap">
 				<img src="${imageUrl}" alt="${displayTitle}">
 				${watchlistButton}
 			</div>
 
 			<div class="card-info">
-				<span class="card-type">${typeLabel}</span>
 				<span class="card-title">${displayTitle}</span>
 				<div class="card-meta">
 					${metaInfo}
@@ -268,8 +294,11 @@ function fetchContent(category, query) {
 		.then((res) => res.json())
 		.then((data) => {
 			if (window.sessionStorage) {
-				console.log(data.results);
-				renderCards(data.results);
+				const results = data.results.map(function (item) {
+					item.media_type = item.media_type || category;
+					return item;
+				});
+				renderCards(results);
 			}
 		})
 		.catch((err) => console.error(err));
@@ -285,6 +314,15 @@ function performSearch(query) {
 	} else if (personCategoryButton.classList.contains('active')) {
 		fetchContent('person', query);
 	}
+}
+
+function apiErrorMessage() {
+	console.error(err);
+	movieContainer.innerHTML += `
+		<div class="error-box">
+			<strong>Es gab ein Problem mit der TMDB-API.</strong>
+			<p>Hast du den TMDB_TOKEN gesetzt?</p>
+		</div>`;
 }
 
 function fetchPopularMovies() {
@@ -303,8 +341,11 @@ function fetchPopularMovies() {
 		.then((res) => res.json())
 		.then((data) => {
 			renderCards(data.results);
+			updateToolbar();
 		})
-		.catch((err) => console.error(err));
+		.catch((err) => {
+			apiErrorMessage();
+		});
 }
 
 function fetchTopRatedMovies() {
@@ -323,8 +364,11 @@ function fetchTopRatedMovies() {
 		.then((res) => res.json())
 		.then((data) => {
 			renderCards(data.results);
+			updateToolbar();
 		})
-		.catch((err) => console.error(err));
+		.catch((err) => {
+			apiErrorMessage();
+		});
 }
 
 function fetchUpcomingMovies() {
@@ -347,8 +391,11 @@ function fetchUpcomingMovies() {
 				(movie) => movie.release_date > today,
 			);
 			renderCards(trulyUpcoming);
+			updateToolbar();
 		})
-		.catch((err) => console.error(err));
+		.catch((err) => {
+			apiErrorMessage();
+		});
 }
 
 // ===================== Sonstiges =====================

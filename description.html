@@ -35,12 +35,14 @@
 				<button id="upcoming-content" class="navbar-link">
 					Bald verfügbar
 				</button>
-				<button id="watchlist-content" class="navbar-link">Watchlist</button>
+				<button id="watchlist-content" class="navbar-link active">
+					Watchlist
+				</button>
 			</div>
 
 			<div class="navbar-actions">
 				<a>Username</a>
-				<button id="avatar" title="Einstellungen öffnen">
+				<button id="avatar" title="Dark/Light Mode">
 					<img src="assets/profile-icon.png" />
 				</button>
 			</div>
@@ -71,41 +73,11 @@
 			</div>
 		</div>
 
-		<!-- ===================== Kategorien ===================== -->
-
-		<div id="toolbar">
-			<div class="filter-tabs">
-				<button id="multi-category" class="filter-tab active" data-type="all">
-					Alle
-				</button>
-				<button id="movie-category" class="filter-tab" data-type="movie">
-					Filme
-				</button>
-				<button id="series-category" class="filter-tab" data-type="tv">
-					Serien
-				</button>
-				<button id="person-category" class="filter-tab" data-type="tv">
-					Personen
-				</button>
-			</div>
-		</div>
-
-		<!-- ===================== Searchbar ===================== -->
-
-		<section id="bg-grid">
-			<div class="search-container">
-				<input id="search-input" type="text" placeholder="Filme suchen..." />
-				<i id="search-button" class="fa fa-search"></i>
-			</div>
-		</section>
-
 		<!-- ===================== Movie Grid ===================== -->
 
-		<div id="main-content">
-			<div id="movie-container"></div>
-		</div>
+		<div id="main-content"></div>
 
-		<!-- ===================== Footer ===================== -->
+		<!-- ===================== JavaScript ===================== -->
 
 		<footer>
 			<div class="content">
@@ -172,6 +144,7 @@
 		<!-- ===================== JavaScript ===================== -->
 
 		<script src="assets/config.js"></script>
-		<script src="assets/script.js"></script>
+		<script src="assets/watchlist.js"></script>
+		<script src="assets/description.js"></script>
 	</body>
 </html>

@@ -211,7 +211,7 @@ function fetchWatchlistMovies() {
 
 	const requests = movieCardIds.map(function (id) {
 		return fetch(
-			`https://api.themoviedb.org/3/movie/${id}?language=de-DE`,
+			`https://api.themoviedb.org/3/movie/95479?language=de-DE`,
 			options,
 		).then((res) => res.json());
 	});
