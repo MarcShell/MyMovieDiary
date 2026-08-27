@@ -84,24 +84,21 @@ modal.addEventListener('click', function (event) {
 
 // Theme umschalten
 lightThemeRadio.addEventListener('change', function () {
-	document.body.classList.remove('dark');
+	document.documentElement.classList.remove('dark');
 	localStorage.setItem('theme', 'light');
 });
 
 darkThemeRadio.addEventListener('change', function () {
-	document.body.classList.add('dark');
+	document.documentElement.classList.add('dark');
 	localStorage.setItem('theme', 'dark');
 });
 
-// Gespeichertes Theme beim Laden wiederherstellen
 document.addEventListener('DOMContentLoaded', function () {
 	const savedTheme = localStorage.getItem('theme');
 
 	if (savedTheme === 'dark') {
-		document.body.classList.add('dark');
 		darkThemeRadio.checked = true;
 	} else {
-		document.body.classList.remove('dark');
 		lightThemeRadio.checked = true;
 	}
 });
@@ -155,59 +152,103 @@ searchButton.addEventListener('click', function () {
 
 // ===================== Movie Grid =====================
 
+let movieCardIds = localStorage.getItem('watchlist');
+
+if (movieCardIds !== null && movieCardIds.length > 0) {
+	movieCardIds = JSON.parse(movieCardIds);
+} else {
+	movieCardIds = [];
+}
+
+let favicon = 'fa-plus';
+
 function renderCards(items) {
 	const container = $('#movie-container');
 	container.empty();
 
 	items.forEach(function (item) {
-		if (item.poster_path) {
-			const posterUrl = `https://image.tmdb.org/t/p/w500${item.poster_path}`;
-			const year = item.release_date
-				? item.release_date.split('-')[0]
-				: 'Kein Veröffentlichungsjahr bekannt';
-			const rating = item.vote_average
-				? item.vote_average.toFixed(2)
-				: 'Keine Bewertung bekannt';
+		const isPerson = item.media_type === 'person';
+		const image = isPerson ? item.profile_path : item.poster_path;
 
-			const card = `
-					<div class="movie-card" data-id="${item.id}">
-						<div class="card-image-wrap">
-							<img src="${posterUrl}" alt="${item.title}">
-							<button class="watchlist-button" title="Zur Watchlist hinzufügen">
-								<i class="fa fa-plus"></i>
-							</button>
-						</div>
-
-						<div class="card-info">
-							<span class="card-title">${item.title}</span>
-							<div class="card-meta">
-								<span class="card-year">${year}</span>
-								<span class="card-rating"><i class="fa fa-star"></i> ${rating}</span>
-							</div>
-						</div>
-					</div>`;
-
-			container.append(card);
+		if (!image) {
+			return; // ohne Bild überspringen wir das Item komplett
 		}
+
+		const imageUrl = `https://image.tmdb.org/t/p/w500${image}`;
+		const displayTitle = isPerson ? item.name : item.title || item.name;
+
+		const year = item.release_date
+			? item.release_date.split('-')[0]
+			: item.first_air_date
+				? item.first_air_date.split('-')[0]
+				: null;
+
+		const rating = item.vote_average ? item.vote_average.toFixed(2) : null;
+
+		if (movieCardIds.includes(item.id)) {
+			favicon = 'fa-check';
+		} else {
+			favicon = 'fa-plus';
+		}
+
+		const typeLabel =
+			item.media_type === 'tv'
+				? 'Serie'
+				: item.media_type === 'person'
+					? item.known_for_department || 'Person'
+					: 'Film';
+
+		const watchlistButton = isPerson
+			? ''
+			: `<button class="watchlist-button" title="Zur Watchlist hinzufügen">
+					<i class="fa ${favicon}"></i>
+				</button>`;
+
+		const metaInfo = isPerson
+			? `<span class="card-year">${item.known_for_department || ''}</span>`
+			: `<span class="card-year">${year || 'Kein Veröffentlichungsjahr bekannt'}</span>
+				<span class="card-rating"><i class="fa fa-star"></i> ${rating || 'Keine Bewertung bekannt'}</span>`;
+
+		const card = `
+		<div class="movie-card" data-id="${item.id}">
+			<div class="card-image-wrap">
+				<img src="${imageUrl}" alt="${displayTitle}">
+				${watchlistButton}
+			</div>
+
+			<div class="card-info">
+				<span class="card-type">${typeLabel}</span>
+				<span class="card-title">${displayTitle}</span>
+				<div class="card-meta">
+					${metaInfo}
+				</div>
+			</div>
+		</div>`;
+
+		container.append(card);
 	});
 }
 
 const movieContainer = document.querySelector('#movie-container');
 
-movieContainer.addEventListener('click', function (event) {
-	const button = event.target.closest('.watchlist-button');
-	const icon = document.querySelector('.watchlist-button > i');
+movieContainer.addEventListener('click', function (card) {
+	const movieCardDataId = card.target.closest('.movie-card').dataset.id;
+	const button = card.target.closest('.watchlist-button');
 
-	if (button && icon.classList.contains('fa-plus')) {
-		const movieId = button.closest('.movie-card').dataset;
-		button.classList.replace('fa-plus', 'fa-check');
-		localStorage.setItem('watchlist', JSON.stringify(watchlist));
+	if (button !== null) {
+		const icon = button.querySelector('i');
 
-		console.log('Geklickter Button:', button);
-		console.log('Zugehörige Film-ID:', movieId);
-	} else if (button && icon.classList.contains('fa-check')) {
-		button.classList.replace('fa-check', 'fa-plus');
-		localStorage.removeItem('watchlist');
+		if (icon.classList.contains('fa-plus')) {
+			icon.classList.replace('fa-plus', 'fa-check');
+			movieCardIds.push(Number(movieCardDataId));
+			localStorage.setItem('watchlist', JSON.stringify(movieCardIds));
+		} else {
+			icon.classList.replace('fa-check', 'fa-plus');
+			movieCardIds = movieCardIds.filter(function (id) {
+				return id !== Number(movieCardDataId);
+			});
+			localStorage.setItem('watchlist', JSON.stringify(movieCardIds));
+		}
 	}
 });
 
