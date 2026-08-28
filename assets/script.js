@@ -1,5 +1,13 @@
 'use strict';
 
+const options = {
+	method: 'GET',
+	headers: {
+		accept: 'application/json',
+		Authorization: `Bearer ${TMDB_TOKEN}`,
+	},
+};
+
 // ===================== Navbar =====================
 
 const popularContentNavbar = document.querySelector('#popular-content');
@@ -47,6 +55,8 @@ function restoreActiveNav() {
 		}
 	}
 
+	updateCategories();
+
 	if (savedId === 'popular-content') {
 		fetchPopularMovies();
 	} else if (savedId === 'top-rated-content') {
@@ -55,8 +65,6 @@ function restoreActiveNav() {
 		fetchUpcomingMovies();
 	}
 }
-
-restoreActiveNav();
 
 // ===================== Modal =====================
 
@@ -121,10 +129,8 @@ const categories = document.querySelector('#categories');
 // Kategorien nur anzeigen, wenn benötigt, also bei Suche des Users
 function updateCategories() {
 	if (navbarButtons.some((btn) => btn.classList.contains('active'))) {
-		console.log('0');
 		categories.style.opacity = '0';
 	} else {
-		console.log('1');
 		categories.style.opacity = '1';
 	}
 }
@@ -314,7 +320,7 @@ movieContainer.addEventListener('click', function (card) {
 			icon.classList.replace('fa-plus', 'fa-check');
 			movieCardIds.push({ id: Number(movieCardDataId), media_type: mediaType });
 		}
-		// Bei Plus-Symbol durch Check ersetzen und ID + media_type in Array schreiben
+		// Icon ändern + Eintrag aus Array entfernen durch filter()
 		else {
 			icon.classList.replace('fa-check', 'fa-plus');
 			movieCardIds = movieCardIds.filter(function (entry) {
@@ -327,14 +333,6 @@ movieContainer.addEventListener('click', function (card) {
 });
 
 function fetchContent(category, query) {
-	const options = {
-		method: 'GET',
-		headers: {
-			accept: 'application/json',
-			Authorization: `Bearer ${TMDB_TOKEN}`,
-		},
-	};
-
 	fetch(
 		`https://api.themoviedb.org/3/search/${category}?query=${encodeURIComponent(query)}&include_adult=false&language=de-DE&page=1`,
 		options,
@@ -378,17 +376,9 @@ function apiErrorMessage(err) {
 		</div>`;
 }
 
-function fetchPopularMovies() {
-	const options = {
-		method: 'GET',
-		headers: {
-			accept: 'application/json',
-			Authorization: `Bearer ${TMDB_TOKEN}`,
-		},
-	};
-
+function fetchMoviesByCategory(endpoint) {
 	fetch(
-		'https://api.themoviedb.org/3/movie/popular?language=de-DE&page=1',
+		`https://api.themoviedb.org/3/movie/${endpoint}?language=de-DE&page=1`,
 		options,
 	)
 		.then((res) => res.json())
@@ -399,39 +389,17 @@ function fetchPopularMovies() {
 		.catch((err) => {
 			apiErrorMessage(err);
 		});
+}
+
+function fetchPopularMovies() {
+	fetchMoviesByCategory('popular');
 }
 
 function fetchTopRatedMovies() {
-	const options = {
-		method: 'GET',
-		headers: {
-			accept: 'application/json',
-			Authorization: `Bearer ${TMDB_TOKEN}`,
-		},
-	};
-
-	fetch(
-		'https://api.themoviedb.org/3/movie/top_rated?language=de-DE&page=1',
-		options,
-	)
-		.then((res) => res.json())
-		.then((data) => {
-			renderCards(addMediaType(data.results, 'movie'));
-			updateCategories();
-		})
-		.catch((err) => {
-			apiErrorMessage(err);
-		});
+	fetchMoviesByCategory('top_rated');
 }
 
 function fetchUpcomingMovies() {
-	const options = {
-		method: 'GET',
-		headers: {
-			accept: 'application/json',
-			Authorization: `Bearer ${TMDB_TOKEN}`,
-		},
-	};
 	const today = new Date().toISOString().split('T')[0]; // z.B. "2026-08-26"
 
 	fetch(
@@ -450,5 +418,7 @@ function fetchUpcomingMovies() {
 			apiErrorMessage(err);
 		});
 }
+
+restoreActiveNav();
 
 // ===================== Sonstiges =====================
