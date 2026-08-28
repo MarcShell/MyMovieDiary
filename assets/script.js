@@ -48,6 +48,7 @@ function restoreActiveNav() {
 		btn.classList.remove('active');
 	});
 
+	// Aktiven Navbar-Button farblich markieren
 	if (savedId) {
 		const activeButton = document.querySelector(`#${savedId}`);
 		if (activeButton) {
