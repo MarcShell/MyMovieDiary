@@ -9,6 +9,7 @@
 	--accent: #5e9bd9;
 	--star-empty: #ccc;
 	--star-filled: #f5a623;
+	--card-shadow: rgba(0, 0, 0, 0.35);
 }
 
 :root.dark {
@@ -20,6 +21,7 @@
 	--accent: #5e9bd9;
 	--star-empty: #444;
 	--star-filled: #f5a623;
+	--card-shadow: rgba(255, 255, 255, 0.045);
 }
 
 * {
@@ -420,7 +422,7 @@ p {
 }
 
 .movie-card:hover {
-	box-shadow: -10px 10px 25px rgba(0, 0, 0, 0.35);
+	box-shadow: -10px 10px 25px var(--card-shadow);
 }
 
 .movie-card .card-image-wrap {

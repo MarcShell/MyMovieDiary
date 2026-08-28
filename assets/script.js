@@ -14,26 +14,25 @@ const navbarButtons = [
 	watchlistContentNavbar,
 ];
 
+// Aktuell aktiven Navbar-Button in localStorage speichern
 navbarButtons.forEach(function (button) {
 	button.addEventListener('click', function () {
 		if (button === popularContentNavbar) {
-			fetchPopularMovies();
 			localStorage.setItem('activeNavId', 'popular-content');
 		} else if (button === topRatedContentNavbar) {
-			fetchTopRatedMovies();
 			localStorage.setItem('activeNavId', 'top-rated-content');
 		} else if (button === upcomingContentNavbar) {
-			fetchUpcomingMovies();
 			localStorage.setItem('activeNavId', 'upcoming-content');
 		} else if (button === watchlistContentNavbar) {
 			localStorage.setItem('activeNavId', 'watchlist-content');
 			window.location.href = '../watchlist.html';
 		}
+
 		restoreActiveNav();
 	});
 });
 
-// Beim Laden jeder Seite aktiven Button wiederherstellen
+// Beim Laden der Seite aktiven Button wiederherstellen und entsprechende Filme Laden
 function restoreActiveNav() {
 	const savedId = localStorage.getItem('activeNavId');
 
@@ -67,11 +66,11 @@ const closeModalBtn = document.querySelector('#settings-x');
 const lightThemeRadio = document.querySelector('#light-theme');
 const darkThemeRadio = document.querySelector('#dark-theme');
 
-settings.addEventListener('click', () => {
+settings.addEventListener('click', function () {
 	modal.classList.add('open-modal');
 });
 
-closeModalBtn.addEventListener('click', () => {
+closeModalBtn.addEventListener('click', function () {
 	modal.classList.remove('open-modal');
 });
 
@@ -83,12 +82,12 @@ modal.addEventListener('click', function (event) {
 });
 
 // Theme umschalten
-lightThemeRadio.addEventListener('change', function () {
+lightThemeRadio.addEventListener('click', function () {
 	document.documentElement.classList.remove('dark');
 	localStorage.setItem('theme', 'light');
 });
 
-darkThemeRadio.addEventListener('change', function () {
+darkThemeRadio.addEventListener('click', function () {
 	document.documentElement.classList.add('dark');
 	localStorage.setItem('theme', 'dark');
 });
@@ -117,18 +116,20 @@ const categoryButtons = [
 	personCategoryButton,
 ];
 
-const toolbar = document.querySelector('#toolbar');
+const categories = document.querySelector('#categories');
 
-function updateToolbar() {
+// Kategorien nur anzeigen, wenn benötigt, also bei Suche des Users
+function updateCategories() {
 	if (navbarButtons.some((btn) => btn.classList.contains('active'))) {
 		console.log('0');
-		toolbar.style.opacity = '0';
+		categories.style.opacity = '0';
 	} else {
 		console.log('1');
-		toolbar.style.opacity = '1';
+		categories.style.opacity = '1';
 	}
 }
 
+// Aktive Kategorie farblich markieren
 categoryButtons.forEach(function (button) {
 	button.addEventListener('click', function () {
 		categoryButtons.forEach(function (btn) {
@@ -148,22 +149,8 @@ categoryButtons.forEach(function (button) {
 const searchInput = document.querySelector('#search-input');
 const searchButton = document.querySelector('#search-button');
 
-searchInput.addEventListener('keydown', function (event) {
-	if (event.key === 'Enter') {
-		const query = searchInput.value.trim();
-
-		if (query !== '') {
-			navbarButtons.forEach(function (btn) {
-				btn.classList.remove('active');
-			});
-		}
-
-		updateToolbar();
-		performSearch(searchInput.value);
-	}
-});
-
-searchButton.addEventListener('click', function () {
+// Solange Text eingegeben wurde, Suche ausführen
+function handleSearch() {
 	const query = searchInput.value.trim();
 
 	if (query !== '') {
@@ -171,9 +158,20 @@ searchButton.addEventListener('click', function () {
 			btn.classList.remove('active');
 		});
 
-		updateToolbar();
+		updateCategories();
 		performSearch(query);
 	}
+}
+
+// Enter oder Klick auf die Lupe führt Suche aus
+searchInput.addEventListener('keydown', function (event) {
+	if (event.key === 'Enter') {
+		handleSearch();
+	}
+});
+
+searchButton.addEventListener('click', function () {
+	handleSearch();
 });
 
 // ===================== Movie Grid =====================
@@ -188,68 +186,113 @@ if (movieCardIds !== null && movieCardIds.length > 0) {
 
 let favicon = 'fa-plus';
 
+// Gibt die vollständige Bild-URL zurück, oder null falls kein Bild vorhanden ist
+function getImageUrl(item) {
+	const isPerson = item.media_type === 'person';
+	const image = isPerson ? item.profile_path : item.poster_path;
+
+	if (!image) {
+		return null;
+	}
+
+	return `https://image.tmdb.org/t/p/w500${image}`;
+}
+
+// Titel von Film/Serie zurückgeben oder Name bei Personen
+function getDisplayTitle(item) {
+	if (item.media_type === 'person') {
+		return item.name;
+	}
+
+	return item.title || item.name;
+}
+
+// Film oder Serie haben unterschiedliche Feldnamen
+function getYear(item) {
+	let year = null;
+
+	if (item.release_date) {
+		year = item.release_date.split('-')[0];
+	} else if (item.first_air_date) {
+		year = item.first_air_date.split('-')[0];
+	}
+
+	return year;
+}
+
+function getTypeLabel(item) {
+	let typeLabel;
+
+	if (item.media_type === 'tv') {
+		typeLabel = 'Serie';
+	} else if (item.media_type === 'person') {
+		typeLabel = 'Person';
+	} else {
+		typeLabel = 'Film';
+	}
+
+	return typeLabel;
+}
+
+function isInWatchlist(item) {
+	return movieCardIds.some(function (entry) {
+		return entry.id === item.id;
+	});
+}
+
 function renderCards(items) {
 	const container = $('#movie-container');
 	container.empty();
 
 	items.forEach(function (item) {
 		const isPerson = item.media_type === 'person';
-		const image = isPerson ? item.profile_path : item.poster_path;
+		const imageUrl = getImageUrl(item);
 
-		if (!image) {
-			return; // ohne Bild überspringen wir das Item komplett
+		if (!imageUrl) {
+			return; // Ohne Bild wird das Item übersprungen
 		}
 
-		const imageUrl = `https://image.tmdb.org/t/p/w500${image}`;
-		const displayTitle = isPerson ? item.name : item.title || item.name;
-
-		const year = item.release_date
-			? item.release_date.split('-')[0]
-			: item.first_air_date
-				? item.first_air_date.split('-')[0]
-				: null;
-
+		const displayTitle = getDisplayTitle(item);
+		const year = getYear(item);
 		const rating = item.vote_average ? item.vote_average.toFixed(2) : null;
+		const typeLabel = getTypeLabel(item);
 
-		if (movieCardIds.includes(item.id)) {
+		let favicon;
+		if (isInWatchlist(item)) {
 			favicon = 'fa-check';
 		} else {
 			favicon = 'fa-plus';
 		}
 
-		const typeLabel =
-			item.media_type === 'tv'
-				? 'Serie'
-				: item.media_type === 'person'
-					? 'Person'
-					: 'Film';
-
+		// Macht dass Personen keinen Button zum hinzufügen kriegen
 		const watchlistButton = isPerson
 			? ''
 			: `<button class="watchlist-button" title="Zur Watchlist hinzufügen">
 					<i class="fa ${favicon}"></i>
 				</button>`;
 
+		// Bei Personen Info ihrer Rolle, bei Filmen/Serien release-date etc.
 		const metaInfo = isPerson
 			? `<span class="card-year">${item.known_for_department || ''}</span>`
 			: `<span class="card-year">${year || 'Kein Veröffentlichungsjahr bekannt'}</span>
 				<span class="card-rating"><i class="fa fa-star"></i> ${rating || 'Keine Bewertung bekannt'}</span>`;
 
+		// HTML-Card mit Poster & Zusatzinfos
 		const card = `
-		<div class="movie-card" data-id="${item.id}">
-		<span class="card-type">${typeLabel}</span>
-			<div class="card-image-wrap">
-				<img src="${imageUrl}" alt="${displayTitle}">
-				${watchlistButton}
-			</div>
-
-			<div class="card-info">
-				<span class="card-title">${displayTitle}</span>
-				<div class="card-meta">
-					${metaInfo}
+			<div class="movie-card" data-id="${item.id}" data-media-type="${item.media_type}">
+			<span class="card-type">${typeLabel}</span>
+				<div class="card-image-wrap">
+					<img src="${imageUrl}" alt="${displayTitle}">
+					${watchlistButton}
 				</div>
-			</div>
-		</div>`;
+
+				<div class="card-info">
+					<span class="card-title">${displayTitle}</span>
+					<div class="card-meta">
+						${metaInfo}
+					</div>
+				</div>
+			</div>`;
 
 		container.append(card);
 	});
@@ -258,23 +301,28 @@ function renderCards(items) {
 const movieContainer = document.querySelector('#movie-container');
 
 movieContainer.addEventListener('click', function (card) {
-	const movieCardDataId = card.target.closest('.movie-card').dataset.id;
+	const movieCard = card.target.closest('.movie-card');
+	const movieCardDataId = movieCard.dataset.id;
+	const mediaType = movieCard.dataset.mediaType; // "movie" oder "tv"
 	const button = card.target.closest('.watchlist-button');
 
 	if (button !== null) {
 		const icon = button.querySelector('i');
 
+		// Bei Plus-Symbol durch Check ersetzen und ID + media_type in Array schreiben
 		if (icon.classList.contains('fa-plus')) {
 			icon.classList.replace('fa-plus', 'fa-check');
-			movieCardIds.push(Number(movieCardDataId));
-			localStorage.setItem('watchlist', JSON.stringify(movieCardIds));
-		} else {
-			icon.classList.replace('fa-check', 'fa-plus');
-			movieCardIds = movieCardIds.filter(function (id) {
-				return id !== Number(movieCardDataId);
-			});
-			localStorage.setItem('watchlist', JSON.stringify(movieCardIds));
+			movieCardIds.push({ id: Number(movieCardDataId), media_type: mediaType });
 		}
+		// Bei Plus-Symbol durch Check ersetzen und ID + media_type in Array schreiben
+		else {
+			icon.classList.replace('fa-check', 'fa-plus');
+			movieCardIds = movieCardIds.filter(function (entry) {
+				return entry.id !== Number(movieCardDataId);
+			});
+		}
+
+		localStorage.setItem('watchlist', JSON.stringify(movieCardIds));
 	}
 });
 
@@ -293,13 +341,11 @@ function fetchContent(category, query) {
 	)
 		.then((res) => res.json())
 		.then((data) => {
-			if (window.sessionStorage) {
-				const results = data.results.map(function (item) {
-					item.media_type = item.media_type || category;
-					return item;
-				});
-				renderCards(results);
-			}
+			const results = data.results.map(function (item) {
+				item.media_type = item.media_type || category;
+				return item;
+			});
+			renderCards(results);
 		})
 		.catch((err) => console.error(err));
 }
@@ -316,7 +362,14 @@ function performSearch(query) {
 	}
 }
 
-function apiErrorMessage() {
+// Hilfsfunktion um media_type zu setzen, weil es nicht bei allen Queries war
+function addMediaType(results, type) {
+	return results.map(function (item) {
+		return { ...item, media_type: type };
+	});
+}
+
+function apiErrorMessage(err) {
 	console.error(err);
 	movieContainer.innerHTML += `
 		<div class="error-box">
@@ -340,11 +393,11 @@ function fetchPopularMovies() {
 	)
 		.then((res) => res.json())
 		.then((data) => {
-			renderCards(data.results);
-			updateToolbar();
+			renderCards(addMediaType(data.results, 'movie'));
+			updateCategories();
 		})
 		.catch((err) => {
-			apiErrorMessage();
+			apiErrorMessage(err);
 		});
 }
 
@@ -363,11 +416,11 @@ function fetchTopRatedMovies() {
 	)
 		.then((res) => res.json())
 		.then((data) => {
-			renderCards(data.results);
-			updateToolbar();
+			renderCards(addMediaType(data.results, 'movie'));
+			updateCategories();
 		})
 		.catch((err) => {
-			apiErrorMessage();
+			apiErrorMessage(err);
 		});
 }
 
@@ -390,11 +443,11 @@ function fetchUpcomingMovies() {
 			const trulyUpcoming = data.results.filter(
 				(movie) => movie.release_date > today,
 			);
-			renderCards(trulyUpcoming);
-			updateToolbar();
+			renderCards(addMediaType(trulyUpcoming, 'movie'));
+			updateCategories();
 		})
 		.catch((err) => {
-			apiErrorMessage();
+			apiErrorMessage(err);
 		});
 }
 

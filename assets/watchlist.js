@@ -14,7 +14,6 @@ const navbarButtons = [
 
 navbarButtons.forEach(function (button) {
 	button.addEventListener('click', function () {
-		restoreActiveNav();
 		// Button ID in localstorage speichern
 		localStorage.setItem('activeNavId', button.id);
 
@@ -30,7 +29,7 @@ navbarButtons.forEach(function (button) {
 	});
 });
 
-// Beim Laden jeder Seite aktiven Button wiederherstellen
+// Beim Laden Seite aktiven Button wiederherstellen
 function restoreActiveNav() {
 	const savedId = localStorage.getItem('activeNavId');
 
@@ -46,6 +45,8 @@ function restoreActiveNav() {
 	}
 }
 
+restoreActiveNav();
+
 // ===================== Modal =====================
 
 const modal = document.querySelector('#modal');
@@ -54,11 +55,11 @@ const closeModalBtn = document.querySelector('#settings-x');
 const lightThemeRadio = document.querySelector('#light-theme');
 const darkThemeRadio = document.querySelector('#dark-theme');
 
-settings.addEventListener('click', () => {
+settings.addEventListener('click', function () {
 	modal.classList.add('open-modal');
 });
 
-closeModalBtn.addEventListener('click', () => {
+closeModalBtn.addEventListener('click', function () {
 	modal.classList.remove('open-modal');
 });
 
@@ -70,12 +71,12 @@ modal.addEventListener('click', function (event) {
 });
 
 // Theme umschalten
-lightThemeRadio.addEventListener('change', function () {
+lightThemeRadio.addEventListener('click', function () {
 	document.documentElement.classList.remove('dark');
 	localStorage.setItem('theme', 'light');
 });
 
-darkThemeRadio.addEventListener('change', function () {
+darkThemeRadio.addEventListener('click', function () {
 	document.documentElement.classList.add('dark');
 	localStorage.setItem('theme', 'dark');
 });
@@ -125,18 +126,20 @@ function renderCards(items) {
 
 		const rating = item.vote_average ? item.vote_average.toFixed(2) : null;
 
-		if (movieCardIds.includes(item.id)) {
+		if (movieCardIds.some((entry) => entry.id === item.id)) {
 			favicon = 'fa-check';
 		} else {
 			favicon = 'fa-plus';
 		}
 
-		const typeLabel =
-			item.media_type === 'tv'
-				? 'Serie'
-				: item.media_type === 'person'
-					? item.known_for_department || 'Person'
-					: 'Film';
+		let typeLabel;
+		if (item.media_type === 'tv') {
+			typeLabel = 'Serie';
+		} else if (item.media_type === 'person') {
+			typeLabel = 'Person';
+		} else {
+			typeLabel = 'Film';
+		}
 
 		const watchlistButton = isPerson
 			? ''
@@ -150,20 +153,20 @@ function renderCards(items) {
 				<span class="card-rating"><i class="fa fa-star"></i> ${rating || 'Keine Bewertung bekannt'}</span>`;
 
 		const card = `
-		<div class="movie-card" data-id="${item.id}">
-		<span class="card-type">${typeLabel}</span>
-			<div class="card-image-wrap">
-				<img src="${imageUrl}" alt="${displayTitle}">
-				${watchlistButton}
-			</div>
-
-			<div class="card-info">
-				<span class="card-title">${displayTitle}</span>
-				<div class="card-meta">
-					${metaInfo}
+			<div class="movie-card" data-id="${item.id}" data-media-type="${item.media_type}">
+			<span class="card-type">${typeLabel}</span>
+				<div class="card-image-wrap">
+					<img src="${imageUrl}" alt="${displayTitle}">
+					${watchlistButton}
 				</div>
-			</div>
-		</div>`;
+
+				<div class="card-info">
+					<span class="card-title">${displayTitle}</span>
+					<div class="card-meta">
+						${metaInfo}
+					</div>
+				</div>
+			</div>`;
 
 		container.append(card);
 	});
@@ -172,7 +175,9 @@ function renderCards(items) {
 const movieContainer = document.querySelector('#movie-container');
 
 movieContainer.addEventListener('click', function (card) {
-	const movieCardDataId = card.target.closest('.movie-card').dataset.id;
+	const movieCard = card.target.closest('.movie-card');
+	const movieCardDataId = movieCard.dataset.id;
+	const mediaType = movieCard.dataset.mediaType;
 	const button = card.target.closest('.watchlist-button');
 
 	if (button !== null) {
@@ -180,17 +185,16 @@ movieContainer.addEventListener('click', function (card) {
 
 		if (icon.classList.contains('fa-plus')) {
 			icon.classList.replace('fa-plus', 'fa-check');
-			movieCardIds.push(Number(movieCardDataId));
+			movieCardIds.push({ id: Number(movieCardDataId), media_type: mediaType });
 			localStorage.setItem('watchlist', JSON.stringify(movieCardIds));
 		} else {
 			icon.classList.replace('fa-check', 'fa-plus');
-			movieCardIds = movieCardIds.filter(function (id) {
-				return id !== Number(movieCardDataId);
+			movieCardIds = movieCardIds.filter(function (entry) {
+				return entry.id !== Number(movieCardDataId);
 			});
 			localStorage.setItem('watchlist', JSON.stringify(movieCardIds));
 
-			// Entfernte Karte sofort ausblenden, da sie auf der Watchlist-Seite nicht mehr hingehört
-			card.target.closest('.movie-card').remove();
+			movieCard.remove();
 		}
 	}
 });
@@ -209,11 +213,13 @@ function fetchWatchlistMovies() {
 		},
 	};
 
-	const requests = movieCardIds.map(function (id) {
+	const requests = movieCardIds.map(function (entry) {
 		return fetch(
-			`https://api.themoviedb.org/3/movie/95479?language=de-DE`,
+			`https://api.themoviedb.org/3/${entry.media_type}/${entry.id}?language=de-DE`,
 			options,
-		).then((res) => res.json());
+		)
+			.then((res) => res.json())
+			.then((data) => ({ ...data, media_type: entry.media_type }));
 	});
 
 	Promise.all(requests)
