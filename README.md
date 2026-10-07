@@ -1,2 +1,2 @@
 # MyMovieDiary
-Nutzer fügen Filme/Serien zu einer persönlichen Liste hinzu und verfolgen, was sie geschaut haben.
+Eine Web-Anwendung zum Entdecken und Merken von Filmen und Serien, gebaut mit HTML, CSS und JavaScript (jQuery) und angebunden an die TMDB-API. Nutzer:innen können beliebte, bestbewertete und bald erscheinende Filme durchstöbern, gezielt nach Filmen, Serien oder Personen suchen und Titel mit einem Klick auf ihre persönliche Watchlist setzen. Die Watchlist bleibt im Browser gespeichert, und die Oberfläche lässt sich zwischen Light- und Dark-Mode umschalten.
