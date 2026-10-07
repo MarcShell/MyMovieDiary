@@ -21,7 +21,7 @@
 	--accent: #5e9bd9;
 	--star-empty: #444;
 	--star-filled: #f5a623;
-	--card-shadow: rgba(255, 255, 255, 0.045);
+	--card-shadow: rgba(255, 255, 255, 0.08);
 }
 
 * {
